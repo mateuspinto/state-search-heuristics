@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, jsonify
 from search import plan
+import traceback
 
 app = Flask(__name__)
 
@@ -47,6 +48,7 @@ def get_maps():
     except Exception as e:
         error_message = {"result": "error", "error_details": str(e)}
         print(error_message)
+        traceback.print_exc()
         return jsonify(error_message), 500
 
 
@@ -77,6 +79,7 @@ def start_search():
     except Exception as e:
         error_message = {"result": "error", "error_details": str(e)}
         print(error_message)
+        traceback.print_exc()
         return jsonify(error_message), 500
 
 
@@ -99,6 +102,7 @@ def save_map():
     except Exception as e:
         error_message = {"result": "error", "error_details": str(e)}
         print(error_message)
+        traceback.print_exc()
         return jsonify(error_message), 500
 
 
