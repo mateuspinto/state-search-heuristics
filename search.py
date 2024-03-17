@@ -1,5 +1,5 @@
 import heapq
-from math import sqrt
+from math import sqrt, dist
 
 WALL = "X"
 START_STATE = "S"
@@ -128,11 +128,7 @@ def cost_function(level, state1, state2, cost1, cost2):
         The cost of the edge joining state1 and state2.
     """
 
-    ################################
-    # 1.1 INSIRA SEU CÓDIGO AQUI
-    ################################
-
-    return 0
+    return dist(state1, state2) * (cost1 + cost2) / 2  # Using professor's formula
 
 
 def transition_model(level, state1):
@@ -154,11 +150,55 @@ def transition_model(level, state1):
     """
     adj_states = {}
 
-    ################################
-    # 1.2 INSIRA SEU CÓDIGO AQUI
-    ################################
+    POSSIBLE_MOVES = [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ]  # Eight possible moves, as walking diagonally is allowed
+
+    all_new_positions = [(x + state1[0], y + state1[1]) for x, y in POSSIBLE_MOVES]
+    possible_new_positions = list(
+        filter(
+            lambda position: (position not in level["walls"])  # Must not be a wall
+            and (position in level["spaces"]),  # Must be inside the labyrinth
+            all_new_positions,
+        )
+    )
+
+    adj_states = {
+        possible_new_position: level["spaces"][possible_new_position]
+        for possible_new_position in possible_new_positions
+    }  # Adding the movement cost of the new positions
 
     return adj_states.items()
+
+
+def construct_path(visited, s, g):
+    """Constructs the path from the start node to the goal node based on the visited nodes dictionary.
+
+    Args:
+        visited: A dictionary containing the visited nodes during a graph search.
+        s: The start node represented as a tuple.
+        g: The goal node represented as a tuple.
+
+    Returns:
+        A list representing the path from the start node to the goal node.
+    """
+    looking_back = g
+    path = []
+    while True:
+        path.append(looking_back)
+        if looking_back == s:
+            break
+        looking_back = visited[looking_back]
+    path.reverse()  # It's not really necessary for the plot, since only the path and not the order matters for coloring the labyrinth. However, I wanted to make it more formal.
+
+    return path
 
 
 # =============================
@@ -180,12 +220,22 @@ def bfs(s, g, level, adj):
         containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    queue = [s]
 
-    ################################
-    # 2.1 INSIRA SEU CÓDIGO AQUI
-    ################################
+    while queue:
+        current = queue.pop(0)
 
-    return [], visited
+        if (
+            current == g
+        ):  # If the goal is reached, returns the real path and visited nodes
+            return construct_path(visited, s, g), visited
+
+        for neighbor, _ in adj(level, current):
+            if neighbor not in visited:
+                visited[neighbor] = current
+                queue.append(neighbor)
+
+    return [], visited  # If the goal is not reached, returns an empty path
 
 
 def dfs(s, g, level, adj):
