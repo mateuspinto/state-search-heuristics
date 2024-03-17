@@ -46,6 +46,7 @@ def get_maps():
 
     except Exception as e:
         error_message = {"result": "error", "error_details": str(e)}
+        print(error_message)
         return jsonify(error_message), 500
 
 
@@ -74,7 +75,9 @@ def start_search():
         return response
 
     except Exception as e:
-        return jsonify({"result": "error", "error_details": str(e)}), 500
+        error_message = {"result": "error", "error_details": str(e)}
+        print(error_message)
+        return jsonify(error_message), 500
 
 
 @app.route("/save_map", methods=["GET"])
@@ -94,7 +97,9 @@ def save_map():
         return response
 
     except Exception as e:
-        return jsonify({"result": "error", "error_details": str(e)}), 500
+        error_message = {"result": "error", "error_details": str(e)}
+        print(error_message)
+        return jsonify(error_message), 500
 
 
 if __name__ == "__main__":
