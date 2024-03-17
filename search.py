@@ -194,16 +194,11 @@ def construct_path(visited, s, g):
     looking_back = g
     path = []
 
-    loop = 0
     while True:
         path.append(looking_back)
         if looking_back == s:
             break
         looking_back = visited[looking_back]
-        loop += 1
-        if loop > 100:
-            print("ERROR")
-            break
     path.reverse()  # It's not really necessary for the plot, since only the path and not the order matters for coloring the labyrinth. However, I wanted to make it more formal.
 
     print(path)
@@ -324,13 +319,14 @@ def ucs(s, g, level, adj):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
-    actual_best_costs = {s_level: float("inf") for s_level in level["spaces"]}
+    actual_best_costs = {
+        s_level: float("inf") for s_level in level["spaces"]
+    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
 
     actual_best_costs[s] = 0
     heap = MinHeap([(0, s)])
 
     while heap:  # While there are still nodes to be visited
-        print(actual_best_costs)
         _, current = heap.pop()
         if current == g:
             return construct_path(visited, s, g), visited
@@ -361,12 +357,25 @@ def greedy_best_first(s, g, level, adj, h):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    actual_best_costs = {
+        s_level: float("inf") for s_level in level["spaces"]
+    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
 
-    ################################
-    # 3.2 INSIRA SEU CÓDIGO AQUI
-    ################################
+    actual_best_costs[s] = 0
+    heap = MinHeap([(h(s, g), s)])
 
-    return [], visited
+    while heap:  # While there are still nodes to be visited
+        _, current = heap.pop()
+        if current == g:
+            return construct_path(visited, s, g), visited
+
+        for neighbor, cost in adj(level, current):
+            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
+                actual_best_costs[neighbor] = actual_best_costs[current] + cost
+                visited[neighbor] = current
+                heap.append(h(neighbor, g), neighbor)
+
+    return [], visited  # If the goal is not reached, returns an empty path
 
 
 def a_star(s, g, level, adj, h):
@@ -383,12 +392,25 @@ def a_star(s, g, level, adj, h):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    actual_best_costs = {
+        s_level: float("inf") for s_level in level["spaces"]
+    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
 
-    ################################
-    # 3.3 INSIRA SEU CÓDIGO AQUI
-    ################################
+    actual_best_costs[s] = 0
+    heap = MinHeap([(h(s, g), s)])
 
-    return [], visited
+    while heap:  # While there are still nodes to be visited
+        _, current = heap.pop()
+        if current == g:
+            return construct_path(visited, s, g), visited
+
+        for neighbor, cost in adj(level, current):
+            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
+                actual_best_costs[neighbor] = actual_best_costs[current] + cost
+                visited[neighbor] = current
+                heap.append(h(neighbor, g) + actual_best_costs[neighbor], neighbor)
+
+    return [], visited  # If the goal is not reached, returns an empty path
 
 
 # ======================================
@@ -405,11 +427,7 @@ def h_euclidian(s, g):
         The estimated cost from the current cell to the goal.
     """
 
-    ################################
-    # 3.1 INSIRA SEU CÓDIGO AQUI
-    ################################
-
-    return 0
+    return dist(s, g)
 
 
 def h_manhattan(s, g):
@@ -423,8 +441,4 @@ def h_manhattan(s, g):
         The estimated cost from the current cell to the goal.
     """
 
-    ################################
-    # 3.1 INSIRA SEU CÓDIGO AQUI
-    ################################
-
-    return 0
+    return abs(s[0] - g[0]) + abs(s[1] - g[1])
