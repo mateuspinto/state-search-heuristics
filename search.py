@@ -86,8 +86,6 @@ def parse_level(map):
 
     level = {"walls": walls, "spaces": spaces, "start": start, "goal": goal}
 
-    print(level)
-
     return level
 
 
@@ -271,6 +269,33 @@ def dfs(s, g, level, adj):
     return [], visited  # If the goal is not reached, returns an empty path
 
 
+class MinHeap:
+    def __init__(self, initial_values):
+        self.heap = initial_values
+        heapq.heapify(self.heap)
+
+    def __bool__(self):
+        return bool(self.heap)
+
+    def pop(self):
+        return heapq.heappop(self.heap)[1]
+
+    def append(self, cost, node):
+        for i, (c, n) in enumerate(self.heap):
+            if n == node and c <= cost:  # If node exists with lower or equal cost, exit
+                return
+            if n == node:
+                self.heap[i] = (
+                    cost,
+                    node,
+                )  # If node exists with higher cost, update its cost
+                break
+        else:  # If node doesn't exist, append it to the heap
+            self.heap.append((cost, node))
+
+        heapq.heapify(self.heap)
+
+
 def ucs(s, g, level, adj):
     """Searches for a path from the source to the goal using the Uniform-Cost Search algorithm.
 
@@ -284,12 +309,23 @@ def ucs(s, g, level, adj):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    heap = MinHeap([(0, s)])
 
-    ################################
-    # 2.3 INSIRA SEU CÓDIGO AQUI
-    ################################
+    while heap:  # While there are still nodes to be visited
+        current = heap.pop()
 
-    return [], visited
+        if (
+            current == g
+        ):  # If the goal is reached, returns the real path and visited nodes
+            return construct_path(visited, s, g), visited
+
+        for neighbor, cost in adj(level, current):
+            if neighbor not in visited:
+                visited[neighbor] = current
+                print(visited)
+                heap.append(cost, neighbor)
+
+    return [], visited  # If the goal is not reached, returns an empty path
 
 
 # ======================================
