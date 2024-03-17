@@ -86,6 +86,8 @@ def parse_level(map):
 
     level = {"walls": walls, "spaces": spaces, "start": start, "goal": goal}
 
+    print(level)
+
     return level
 
 
@@ -164,8 +166,9 @@ def transition_model(level, state1):
     all_new_positions = [(x + state1[0], y + state1[1]) for x, y in POSSIBLE_MOVES]
     possible_new_positions = list(
         filter(
-            lambda position: (position not in level["walls"])  # Must not be a wall
-            and (position in level["spaces"]),  # Must be inside the labyrinth
+            lambda position: (
+                position in level["spaces"]
+            ),  # Must be inside the labyrinth
             all_new_positions,
         )
     )
@@ -222,7 +225,7 @@ def bfs(s, g, level, adj):
     visited = {s: None}
     queue = [s]
 
-    while queue:
+    while queue:  # While there are still nodes to be visited
         current = queue.pop(0)
 
         if (
@@ -250,12 +253,22 @@ def dfs(s, g, level, adj):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    stack = [s]
 
-    ################################
-    # 2.2 INSIRA SEU CÓDIGO AQUI
-    ################################
+    while stack:  # While there are still nodes to be visited
+        current = stack.pop()
 
-    return [], visited
+        if (
+            current == g
+        ):  # If the goal is reached, returns the real path and visited nodes
+            return construct_path(visited, s, g), visited
+
+        for neighbor, _ in adj(level, current):
+            if neighbor not in visited:
+                visited[neighbor] = current
+                stack.append(neighbor)
+
+    return [], visited  # If the goal is not reached, returns an empty path
 
 
 def ucs(s, g, level, adj):
