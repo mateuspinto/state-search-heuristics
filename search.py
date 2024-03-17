@@ -1,5 +1,6 @@
 import heapq
 from math import sqrt, dist
+import time
 
 WALL = "X"
 START_STATE = "S"
@@ -192,13 +193,20 @@ def construct_path(visited, s, g):
     """
     looking_back = g
     path = []
+
+    loop = 0
     while True:
         path.append(looking_back)
         if looking_back == s:
             break
         looking_back = visited[looking_back]
+        loop += 1
+        if loop > 100:
+            print("ERROR")
+            break
     path.reverse()  # It's not really necessary for the plot, since only the path and not the order matters for coloring the labyrinth. However, I wanted to make it more formal.
 
+    print(path)
     return path
 
 
@@ -277,23 +285,30 @@ class MinHeap:
     def __bool__(self):
         return bool(self.heap)
 
+    def __str__(self):
+        return str(self.heap)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def pop(self):
-        return heapq.heappop(self.heap)[1]
+        return heapq.heappop(self.heap)
 
     def append(self, cost, node):
         for i, (c, n) in enumerate(self.heap):
-            if n == node and c <= cost:  # If node exists with lower or equal cost, exit
-                return
+            if n == node and c <= cost:
+                return False
             if n == node:
                 self.heap[i] = (
                     cost,
                     node,
-                )  # If node exists with higher cost, update its cost
-                break
-        else:  # If node doesn't exist, append it to the heap
+                )
+                heapq.heapify(self.heap)
+                return True
+        else:
             self.heap.append((cost, node))
-
-        heapq.heapify(self.heap)
+            heapq.heapify(self.heap)
+            return True
 
 
 def ucs(s, g, level, adj):
@@ -309,21 +324,22 @@ def ucs(s, g, level, adj):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
+    actual_best_costs = {s_level: float("inf") for s_level in level["spaces"]}
+
+    actual_best_costs[s] = 0
     heap = MinHeap([(0, s)])
 
     while heap:  # While there are still nodes to be visited
-        current = heap.pop()
-
-        if (
-            current == g
-        ):  # If the goal is reached, returns the real path and visited nodes
+        print(actual_best_costs)
+        _, current = heap.pop()
+        if current == g:
             return construct_path(visited, s, g), visited
 
         for neighbor, cost in adj(level, current):
-            if neighbor not in visited:
+            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
+                actual_best_costs[neighbor] = actual_best_costs[current] + cost
                 visited[neighbor] = current
-                print(visited)
-                heap.append(cost, neighbor)
+                heap.append(actual_best_costs[neighbor], neighbor)
 
     return [], visited  # If the goal is not reached, returns an empty path
 
