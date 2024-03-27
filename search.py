@@ -129,7 +129,7 @@ def cost_function(level, state1, state2, cost1, cost2):
         The cost of the edge joining state1 and state2.
     """
 
-    return dist(state1, state2) * (cost1 + cost2) / 2  # Using professor's formula
+    return dist(state1, state2) * ((cost1 + cost2) / 2)  # Using professor's formula
 
 
 def transition_model(level, state1):
@@ -335,9 +335,9 @@ def ucs(s, g, level, adj):
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (parent_cost + movement_cost) < actual_best_costs.get(
-                child_node, float("inf")
-            ):
+            if (child_node not in visited) and (
+                parent_cost + movement_cost
+            ) < actual_best_costs.get(child_node, float("inf")):
                 actual_best_costs[child_node] = (
                     actual_best_costs[parent_node] + movement_cost
                 )
@@ -374,9 +374,9 @@ def greedy_best_first(s, g, level, adj, h):
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (parent_cost + movement_cost) < actual_best_costs.get(
-                child_node, float("inf")
-            ):
+            if (child_node not in visited) and (
+                parent_cost + movement_cost
+            ) < actual_best_costs.get(child_node, float("inf")):
                 actual_best_costs[child_node] = (
                     actual_best_costs[parent_node] + movement_cost
                 )
@@ -410,9 +410,9 @@ def a_star(s, g, level, adj, h):
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (parent_cost + movement_cost) < actual_best_costs.get(
-                child_node, float("inf")
-            ):
+            if (child_node not in visited) and (
+                parent_cost + movement_cost
+            ) < actual_best_costs.get(child_node, float("inf")):
                 actual_best_costs[child_node] = (
                     actual_best_costs[parent_node] + movement_cost
                 )
