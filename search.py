@@ -319,11 +319,8 @@ def ucs(s, g, level, adj):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
-    actual_best_costs = {
-        s_level: float("inf") for s_level in level["spaces"]
-    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
+    actual_best_costs = {s: 0}
 
-    actual_best_costs[s] = 0
     heap = MinHeap([(0, s)])
 
     while heap:  # While there are still nodes to be visited
@@ -332,7 +329,10 @@ def ucs(s, g, level, adj):
             return construct_path(visited, s, g), visited
 
         for neighbor, cost in adj(level, current):
-            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
+            if (
+                actual_best_costs.get(neighbor, float("inf"))
+                > actual_best_costs[current] + cost
+            ):
                 actual_best_costs[neighbor] = actual_best_costs[current] + cost
                 visited[neighbor] = current
                 heap.append(actual_best_costs[neighbor], neighbor)
