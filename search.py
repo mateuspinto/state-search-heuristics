@@ -173,7 +173,13 @@ def transition_model(level, state1):
     )
 
     adj_states = {
-        possible_new_position: level["spaces"][possible_new_position]
+        possible_new_position: cost_function(
+            level,
+            state1,
+            possible_new_position,
+            level["spaces"][state1],
+            level["spaces"][possible_new_position],
+        )
         for possible_new_position in possible_new_positions
     }  # Adding the movement cost of the new positions
 
@@ -324,18 +330,19 @@ def ucs(s, g, level, adj):
     heap = MinHeap([(0, s)])
 
     while heap:  # While there are still nodes to be visited
-        _, current = heap.pop()
-        if current == g:
+        parent_cost, parent_node = heap.pop()
+        if parent_node == g:
             return construct_path(visited, s, g), visited
 
-        for neighbor, cost in adj(level, current):
-            if (
-                actual_best_costs.get(neighbor, float("inf"))
-                > actual_best_costs[current] + cost
+        for child_node, movement_cost in adj(level, parent_node):
+            if (parent_cost + movement_cost) < actual_best_costs.get(
+                child_node, float("inf")
             ):
-                actual_best_costs[neighbor] = actual_best_costs[current] + cost
-                visited[neighbor] = current
-                heap.append(actual_best_costs[neighbor], neighbor)
+                actual_best_costs[child_node] = (
+                    actual_best_costs[parent_node] + movement_cost
+                )
+                visited[child_node] = parent_node
+                heap.append(actual_best_costs[child_node], child_node)
 
     return [], visited  # If the goal is not reached, returns an empty path
 
@@ -357,23 +364,24 @@ def greedy_best_first(s, g, level, adj, h):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
-    actual_best_costs = {
-        s_level: float("inf") for s_level in level["spaces"]
-    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
+    actual_best_costs = {s: 0}
 
-    actual_best_costs[s] = 0
     heap = MinHeap([(h(s, g), s)])
 
     while heap:  # While there are still nodes to be visited
-        _, current = heap.pop()
-        if current == g:
+        parent_cost, parent_node = heap.pop()
+        if parent_node == g:
             return construct_path(visited, s, g), visited
 
-        for neighbor, cost in adj(level, current):
-            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
-                actual_best_costs[neighbor] = actual_best_costs[current] + cost
-                visited[neighbor] = current
-                heap.append(h(neighbor, g), neighbor)
+        for child_node, movement_cost in adj(level, parent_node):
+            if (parent_cost + movement_cost) < actual_best_costs.get(
+                child_node, float("inf")
+            ):
+                actual_best_costs[child_node] = (
+                    actual_best_costs[parent_node] + movement_cost
+                )
+                visited[child_node] = parent_node
+                heap.append(h(child_node, g), child_node)
 
     return [], visited  # If the goal is not reached, returns an empty path
 
@@ -392,23 +400,26 @@ def a_star(s, g, level, adj, h):
         A list of tuples containing cells from the source to the goal, and a dictionary containing the visited cells and their respective parent cells.
     """
     visited = {s: None}
-    actual_best_costs = {
-        s_level: float("inf") for s_level in level["spaces"]
-    }  # TODO: Verificar com o professor se é realmente necessária este dicionário, mas eu acho que é
+    actual_best_costs = {s: 0}
 
-    actual_best_costs[s] = 0
     heap = MinHeap([(h(s, g), s)])
 
     while heap:  # While there are still nodes to be visited
-        _, current = heap.pop()
-        if current == g:
+        parent_cost, parent_node = heap.pop()
+        if parent_node == g:
             return construct_path(visited, s, g), visited
 
-        for neighbor, cost in adj(level, current):
-            if actual_best_costs[neighbor] > actual_best_costs[current] + cost:
-                actual_best_costs[neighbor] = actual_best_costs[current] + cost
-                visited[neighbor] = current
-                heap.append(h(neighbor, g) + actual_best_costs[neighbor], neighbor)
+        for child_node, movement_cost in adj(level, parent_node):
+            if (parent_cost + movement_cost) < actual_best_costs.get(
+                child_node, float("inf")
+            ):
+                actual_best_costs[child_node] = (
+                    actual_best_costs[parent_node] + movement_cost
+                )
+                visited[child_node] = parent_node
+                heap.append(
+                    h(child_node, g) + actual_best_costs[child_node], child_node
+                )
 
     return [], visited  # If the goal is not reached, returns an empty path
 
