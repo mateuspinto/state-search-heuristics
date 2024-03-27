@@ -150,15 +150,15 @@ def transition_model(level, state1):
              ... ]
     """
     adj_states = {}
-
+    # CHANGED: colocando da esq p dir, de cima p baixo. Fazer isso mudou nda
     POSSIBLE_MOVES = [
         (-1, -1),
-        (-1, 0),
-        (-1, 1),
         (0, -1),
-        (0, 1),
         (1, -1),
+        (-1, 0),
         (1, 0),
+        (-1, 1),
+        (0, 1),
         (1, 1),
     ]  # Eight possible moves, as walking diagonally is allowed
 
@@ -330,19 +330,18 @@ def ucs(s, g, level, adj):
     heap = MinHeap([(0, s)])
 
     while heap:  # While there are still nodes to be visited
-        parent_cost, parent_node = heap.pop()
+        _, parent_node = heap.pop()
         if parent_node == g:
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (child_node not in visited) and (
-                parent_cost + movement_cost
-            ) < actual_best_costs.get(child_node, float("inf")):
-                actual_best_costs[child_node] = (
-                    actual_best_costs[parent_node] + movement_cost
-                )
+            new_cost = actual_best_costs[parent_node] + movement_cost
+            current_cost = actual_best_costs.get(child_node, float("inf"))
+
+            if (child_node not in visited) and (new_cost < current_cost):
+                actual_best_costs[child_node] = new_cost
                 visited[child_node] = parent_node
-                heap.append(actual_best_costs[child_node], child_node)
+                heap.append(new_cost, child_node)
 
     return [], visited  # If the goal is not reached, returns an empty path
 
@@ -369,17 +368,16 @@ def greedy_best_first(s, g, level, adj, h):
     heap = MinHeap([(h(s, g), s)])
 
     while heap:  # While there are still nodes to be visited
-        parent_cost, parent_node = heap.pop()
+        _, parent_node = heap.pop()
         if parent_node == g:
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (child_node not in visited) and (
-                parent_cost + movement_cost
-            ) < actual_best_costs.get(child_node, float("inf")):
-                actual_best_costs[child_node] = (
-                    actual_best_costs[parent_node] + movement_cost
-                )
+            new_cost = actual_best_costs[parent_node] + movement_cost
+            current_cost = actual_best_costs.get(child_node, float("inf"))
+
+            if (child_node not in visited) and (new_cost < current_cost):
+                actual_best_costs[child_node] = new_cost
                 visited[child_node] = parent_node
                 heap.append(h(child_node, g), child_node)
 
@@ -405,21 +403,18 @@ def a_star(s, g, level, adj, h):
     heap = MinHeap([(h(s, g), s)])
 
     while heap:  # While there are still nodes to be visited
-        parent_cost, parent_node = heap.pop()
+        _, parent_node = heap.pop()
         if parent_node == g:
             return construct_path(visited, s, g), visited
 
         for child_node, movement_cost in adj(level, parent_node):
-            if (child_node not in visited) and (
-                parent_cost + movement_cost
-            ) < actual_best_costs.get(child_node, float("inf")):
-                actual_best_costs[child_node] = (
-                    actual_best_costs[parent_node] + movement_cost
-                )
+            new_cost = actual_best_costs[parent_node] + movement_cost
+            current_cost = actual_best_costs.get(child_node, float("inf"))
+
+            if (child_node not in visited) and (new_cost < current_cost):
+                actual_best_costs[child_node] = new_cost
                 visited[child_node] = parent_node
-                heap.append(
-                    h(child_node, g) + actual_best_costs[child_node], child_node
-                )
+                heap.append(new_cost + h(child_node, g), child_node)
 
     return [], visited  # If the goal is not reached, returns an empty path
 
