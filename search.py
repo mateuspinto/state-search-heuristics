@@ -1,6 +1,5 @@
 import heapq
-from math import sqrt, dist
-import time
+from math import dist
 
 WALL = "X"
 START_STATE = "S"
