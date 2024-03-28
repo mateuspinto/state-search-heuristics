@@ -149,7 +149,6 @@ def transition_model(level, state1):
              ... ]
     """
     adj_states = {}
-    # CHANGED: colocando da esq p dir, de cima p baixo. Fazer isso mudou nda
     POSSIBLE_MOVES = [
         (-1, -1),
         (0, -1),
